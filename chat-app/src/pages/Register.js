@@ -1,112 +1,119 @@
-import React, { useState,useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "styled-components";
-import { Link } from "react-router-dom";
-import Logo from "../assets/logo.svg"
-import {toast , ToastContainer} from "react-toastify";
+import { Link, useNavigate } from "react-router-dom";
+// import Logo from "../assets/logo.svg";
+import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import axios from "axios";
 import { registerRoute } from "../utils/APIRoutes";
-function Register() {
-
-  const toastOptions ={
-  position: "bottom-right",
+function Login() {
+  const navigate = useNavigate();
+  const toastOptions = {
+    position: "bottom-right",
     autoClose: 8000,
     pauseOnHover: true,
     draggable: true,
     theme: "dark",
-  }
-const[Values,setValues]=useState({
-    username:"",
-    email:"",
-    password:"",
-    ConfirmPassword:"",
+  };
+  const [Values, setValues] = useState({
+    username: "",
+    email: "",
+    password: "",
+    ConfirmPassword: "",
   });
 
-const handleSubmit= async(event)=>{
-  event.preventDefault();
-  
-  if(handleValidation()){
-    console.log("invalidation",registerRoute);
-    const {password,ConfirmPassword,username,email}=Values;
-    const {data} =await axios.post(registerRoute,
-      {
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
+    if (handleValidation()) {
+      console.log("invalidation", registerRoute);
+      const { password, ConfirmPassword, username, email } = Values;
+      const { data } = await axios.post(registerRoute, {
         username,
         email,
         password,
+      });
+      if (data.status === false) {
+        toast.error(data.msg, toastOptions);
+      }
+      if (data.status === true) {
+        localStorage.setItem("chat-app-user", JSON.stringify(data.user));
+        navigate("/");
+      }
+    }
+  };
 
-    });
-  }
-  
-}
+  const handleChange = (event) => {
+    setValues({ ...Values, [event.target.name]: event.target.value });
+  };
 
-const handleChange=(event)=>{
- setValues({...Values,[event.target.name]:event.target.value});
-};
+  const handleValidation = () => {
+    const { password, ConfirmPassword, username, email } = Values;
 
-const handleValidation=()=>{
-const {password,ConfirmPassword,username,email}=Values;
+    if (password !== ConfirmPassword) {
+      toast.error("Password and ConfirmPassword should be same.", toastOptions);
+      return false;
+    } else if (username.length === 0) {
+      toast.error("Username is required ", toastOptions);
+      return false;
+    } else if (username.length < 3) {
+      toast.error("Username should more than 3 ", toastOptions);
+      return false;
+    } else if (password.length < 8) {
+      toast.error("Password should more or equal than 8", toastOptions);
+      return false;
+    } else if (email.length === 0) {
+      toast.error("Email is Required", toastOptions);
+      return false;
+    }
+    return true;
+  };
 
-if(password!==ConfirmPassword){
-toast.error("Password and ConfirmPassword should be same.",toastOptions);
-  return false;
-}
-else if(username.length===0){
-  toast.error("Username is required ",toastOptions);
-  return false;
-}
-else if(username.length<3){
-  toast.error("Username should more than 3 ",toastOptions);
-  return false;
-}
-else if(password.length<8){
-  toast.error("Password should more or equal than 8",toastOptions);
-  return false;
-}
-else if(email.length===0){
-  toast.error("Email is Required",toastOptions);
-  return false;
-}
-return true;
-};
-
-
-  return(
+  return (
     <>
-    <FormContainer>
-      <form onSubmit={(event)=>handleSubmit(event)} >
-        <div className="brand">
-          <img src={Logo} alt="Logo" />
-          <h1>Snappy</h1>
-        </div>
-      <input type="text"
-     placeholder="Username"
-      name="username" 
-      onChange={(e)=>handleChange(e)} />
+      <FormContainer>
+        <form onSubmit={(event) => handleSubmit(event)}>
+          <div className="brand">
+            {/* <img src={Logo} alt="Logo" /> */}
+            <h1>DOGOCHAT</h1>
+          </div>
+          <input
+            type="text"
+            placeholder="Username"
+            name="username"
+            onChange={(e) => handleChange(e)}
+          />
 
-      <input type="email"
-     placeholder="Email"
-      name="email" 
-      onChange={(e)=>handleChange(e)} />
-      <input type="password"
-     placeholder="password"
-      name="password" 
-      onChange={(e)=>handleChange(e)} />
+          <input
+            type="email"
+            placeholder="Email"
+            name="email"
+            onChange={(e) => handleChange(e)}
+          />
+          <input
+            type="password"
+            placeholder="password"
+            name="password"
+            onChange={(e) => handleChange(e)}
+          />
 
-     <input type="password"
-     placeholder="Confirm password"
-      name="ConfirmPassword" 
-      onChange={(e)=>handleChange(e)} />
-    <button type="submit">Create User</button>
-    <span>Already have an account?
-      <Link to="/login">Login</Link>
-    </span>
-    </form>
-    </FormContainer>
-    <ToastContainer/>
+          <input
+            type="password"
+            placeholder="Confirm password"
+            name="ConfirmPassword"
+            onChange={(e) => handleChange(e)}
+          />
+          <button type="submit">Create User</button>
+          <span>
+            Already have an account?
+            <Link to="/login">Login</Link>
+          </span>
+        </form>
+      </FormContainer>
+      <ToastContainer />
     </>
   );
 }
-
 
 const FormContainer = styled.div`
   height: 100vh;
@@ -177,5 +184,4 @@ const FormContainer = styled.div`
   }
 `;
 
-
-export default Register;
+export default Login;
